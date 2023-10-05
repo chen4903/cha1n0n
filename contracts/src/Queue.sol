@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // https://ethereum.stackexchange.com/questions/129668/how-to-efficiently-implement-a-fifo-array-queue-in-solidity
 // pragma solidity ^0.8.0;
-// 这个代码写的是有错的
+// 这个代码写的是有错的, transferUserRightPending()的FIFO模型参考了这个代码
 // contract Queue {
 //     mapping (uint256 => uint256 /* or any other type */ ) public queue;
 //     uint256 first = 1;
