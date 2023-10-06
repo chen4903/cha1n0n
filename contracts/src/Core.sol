@@ -66,6 +66,12 @@ contract Core is Test{
 
     event DescribeAlnum(address singer, address user, bytes4 albumName);
     event SwapRightAlbum(address singer, address fromUser, address toUser, bytes4 albumName);
+    event DescribeSinger(address singer, address user, uint256 time);
+    event SwapRightSinger(address singer, address fromUser, address toUser, uint256 time);
+    event OrderPending(address singer, address seller,bytes4 albumName);
+    event SingerUpdate(address singer, uint256 price,  bytes4 albumName);
+    event InvestSinger(address[] musicPlatform, address[] singer, uint256[][] amount);
+    event AllocMoney(address[] singer, address[][] musicPlatform, uint256[][] molecular, uint256[] Denominator);
 
     constructor() {
         owner = msg.sender;
@@ -104,6 +110,8 @@ contract Core is Test{
                         uint256 timeInner = _choice == 0 ? SIXMONTHS : THREEMONTHS; // 0 是 6个月， 其他参数是3个月
                         userDescribeSingers[msg.sender][_singer].end = block.timestamp + timeInner;
                         singerSongs[_singer].totalReward += singerSongs[_singer].price;
+
+                        emit DescribeSinger(_singer, msg.sender, _choice == 0 ? SIXMONTHS : THREEMONTHS);
                         return;
                     }
                 }
@@ -129,12 +137,16 @@ contract Core is Test{
                 singerSongs[_singer].totalReward -= returnAmount;
 
                 payable(seller).transfer(returnAmount); // TODO 检查是否是合约，否则会出现DoS
+
+                emit SwapRightSinger(_singer, seller, msg.sender, _choice == 0 ? SIXMONTHS : THREEMONTHS);
             }else{ // 没的话就买
                 userDescribeSingersList[msg.sender].push(_singer);
                 userDescribeSingers[msg.sender][_singer].start = block.timestamp;
                 uint256 time = _choice == 0 ? SIXMONTHS : THREEMONTHS; // 0 是 6个月， 其他参数是3个月
                 userDescribeSingers[msg.sender][_singer].end = block.timestamp + time;
                 singerSongs[_singer].totalReward += singerSongs[_singer].price;
+
+                emit DescribeSinger(_singer, msg.sender, _choice == 0 ? SIXMONTHS : THREEMONTHS);
             }
         }else{ // 购买专辑
             require(singerAlbums[_singer][_albumName].price != 0, "album not exist");
@@ -190,7 +202,7 @@ contract Core is Test{
 
             swapSongMarket[_singer][queueSongNumber[_singer].last] = msg.sender;
             queueSongNumber[_singer].last += 1;
-            
+            emit OrderPending(_singer, msg.sender, hex"00000000");
         }else{ // 专辑
             require(singerAlbums[_singer][_albumName].price != 0, "album not exist");
             require(userDescribeAlbums[msg.sender][_singer][_albumName] == true, "u haven't bought the album");
@@ -198,6 +210,7 @@ contract Core is Test{
             swapAlbumMarket[_singer][_albumName][queueAlbumNumber[_singer][_albumName].last] = msg.sender;
             queueAlbumNumber[_singer][_albumName].last += 1;
             
+            emit OrderPending(_singer, msg.sender, _albumName);
         }
     }
 
@@ -206,10 +219,14 @@ contract Core is Test{
         if(_albumName == hex"00000000"){ // 普通歌曲
             singerSongs[msg.sender].singer = msg.sender;
             singerSongs[msg.sender].price = _price;
+
+            emit SingerUpdate(msg.sender, _price, hex"00000000");
         }else{ // 专辑
             singerAlbumsList[msg.sender].push(_albumName);
             singerAlbums[msg.sender][_albumName].singer = msg.sender;
             singerAlbums[msg.sender][_albumName].price = _price;
+
+            emit SingerUpdate(msg.sender, _price, _albumName);
         }
     }
     
@@ -231,6 +248,8 @@ contract Core is Test{
             }
         }
         require(msg.value >= totalAmount, "not enough investMoney");
+
+        emit InvestSinger(_musicPlatform,  _singer, amount);
     }
 
     // 用于计算用户支付订阅和专辑的钱。因为每个季度分配钱之后，历史的收入不会刷新，因此需要一个变量记录上一次的收入，
@@ -303,6 +322,8 @@ contract Core is Test{
         for(uint256 i = 0; i < singerLength; i++){
             singerSongs[_singer[i]].totalAmount = 0;
         }
+        
+        emit AllocMoney(_singer,  _musicPlatform, _molecular,  _Denominator);
     }
 
     // 查看：市场中有多少歌曲或者专辑在卖
