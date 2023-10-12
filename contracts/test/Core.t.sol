@@ -36,6 +36,24 @@ contract CoreTest is Test {
 
     // 测试：订阅、转让专辑、FIFO的转让规则、市场有人卖就不订阅而是交易、市场长度计算
     function test_describe_transferRight() public{
+        // 准备describe
+        vm.startBroadcast(user01);
+        core.readyForDescribe();
+        vm.stopBroadcast();
+        vm.startBroadcast(user02);
+        core.readyForDescribe();
+        vm.stopBroadcast();
+        vm.startBroadcast(user03);
+        core.readyForDescribe();
+        vm.stopBroadcast();
+        vm.startBroadcast(user04);
+        core.readyForDescribe();
+        vm.stopBroadcast();
+        vm.startBroadcast(user05);
+        core.readyForDescribe();
+        vm.stopBroadcast();
+
+        vm.warp(block.timestamp + 1);
 
         vm.startBroadcast(singer01);
         // 注册成为歌手
@@ -130,6 +148,25 @@ contract CoreTest is Test {
 
     // 测试：owner投资、计算音乐平台的回报数额、分配奖金
     function test_investSinger_calReward() public{
+        // 准备describe
+        vm.startBroadcast(user01);
+        core.readyForDescribe();
+        vm.stopBroadcast();
+        vm.startBroadcast(user02);
+        core.readyForDescribe();
+        vm.stopBroadcast();
+        vm.startBroadcast(user03);
+        core.readyForDescribe();
+        vm.stopBroadcast();
+        vm.startBroadcast(user04);
+        core.readyForDescribe();
+        vm.stopBroadcast();
+        vm.startBroadcast(user05);
+        core.readyForDescribe();
+        vm.stopBroadcast();
+
+        vm.warp(block.timestamp + 1);
+
         // musicPlatform01给singer01投资3ether，给singer02投资4ether，需要提前发送到合约，然后告诉接口平台方案。
         // musicPlatform02给singer01投资2ether，给singer02投资3ether，需要提前发送到合约，然后告诉接口平台方案。
         vm.startBroadcast(musicPlatform01);

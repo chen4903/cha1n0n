@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../lib/forge-std/src/Test.sol";
-
-contract Core is Test{
+contract Core{
     uint256 constant THREEMONTHS = 90 days;
     uint256 constant SIXMONTHS = 180 days;
 
@@ -82,8 +80,26 @@ contract Core is Test{
         _;
     }
 
+    mapping(address=>uint256) public isReadyForDescribe;
+    function readyForDescribe() external {
+        isReadyForDescribe[msg.sender] = block.timestamp;
+    }
+
     // 用户：订阅歌手/专辑
     function describe(address _singer, bytes4 _albumName, uint256 _choice) external payable{
+        // 只允许user是EOA账户，是为了防止DoS攻击。并且为了防止构造器攻击，增加了readyForDescribe()
+        uint32 size;
+        address addr = msg.sender;
+        assembly {
+            size := extcodesize(addr)
+        }
+        if(size > 0){ // 如果是合约
+            revert("describer must be EOA");
+        }else{
+            require(isReadyForDescribe[msg.sender] < block.timestamp, "cannot ready and describe in the same tx");
+            require(isReadyForDescribe[msg.sender] > 0, "have not readyForDescribe");
+        }
+
         if(_albumName == hex"00000000"){ // 订阅歌手
             require(singerSongs[_singer].price != 0, "The singer hasn't registered yet");
             require(msg.value >= singerSongs[_singer].price, "not enough money");
@@ -256,7 +272,7 @@ contract Core is Test{
     // 然后相减，就可以得到上次分配钱之后，又有多少新的收入（新一轮股市）
     mapping(address=>uint256) public lastRewardAmount;
 
-    // 计算充值池收益：歌手收益、音乐平台收益、接口平台手续费
+    // 计算充值池收益：歌手收益、音乐平台收益、接口平台手续费 
     function calReward(
         address _singer, 
         address _musicPlatform, 
@@ -265,24 +281,32 @@ contract Core is Test{
         uint256 _Denominator
     ) public view returns(uint256){
         // 总投资
-        // uint256 investTotal = singerSongs[_singer].totalAmount; // stack too deep，因此在音乐平台投资的收入替换
+        uint256 investTotal = singerSongs[_singer].totalAmount; // stack too deep，因此在音乐平台投资的收入替换
         // 普通歌曲收入
-        // uint256 songAmount = singerSongs[_singer].totalReward; // stack too deep，因此在音乐平台投资的收入替换
+        uint256 songAmount = singerSongs[_singer].totalReward; // stack too deep，因此在音乐平台投资的收入替换
         // 专辑购买收入
         uint256 albumAmount;
         for(uint256 i = 0; i < singerAlbumsList[_singer].length;i++){
             albumAmount += singerAlbums[_singer][singerAlbumsList[_singer][i]].totalReward;
         }
         // 总充值收入 = 普通歌曲收入 + 专辑购买收入 - 上次投资的时候已经分配的金额
-        uint256 totalAmount = singerSongs[_singer].totalReward + albumAmount - lastRewardAmount[_singer];
+        uint256 totalAmount = songAmount + albumAmount - lastRewardAmount[_singer];
         // 歌手占收益的15%，各个_musicPlatform瓜分80%的收益，平台收取5%手续费
         if(_musicPlatform == address(0) && _owner == address(0)){ // 歌手的收入
             return totalAmount * 15 / 100;
         }else if(_musicPlatform != address(0) && _owner == address(0)){ // 音乐平台投资的收入
             // [ (某音乐平台投资金额 / 全部音乐平台投资金额) * 充值池 * 2/3   + 某音乐平台流量比例 * 充值池 * 1/3     ] * 0.8     
             // 注意：100000用于解决精度损失
+            // 原本：
+            //             return (
+            //     ((( 100000 * singerSongs[_singer].musicPlatformAmount[_musicPlatform] ) / singerSongs[_singer].totalAmount) * totalAmount *  2 / 3 / 100000) 
+            // +   ((100000 *  _molecular / _Denominator) * totalAmount *  1 / 3 / 100000)
+            // )
+            // * 80 / 100; 
+            // 由于直接这么return会造成stack too deep，因此分开写，用temp代替
+            uint256 temp = 100000 * singerSongs[_singer].musicPlatformAmount[_musicPlatform];
             return (
-                ((( 100000 * singerSongs[_singer].musicPlatformAmount[_musicPlatform] ) / singerSongs[_singer].totalAmount) * totalAmount *  2 / 3 / 100000) 
+                ((( temp ) / investTotal) * totalAmount *  2 / 3 / 100000) 
             +   ((100000 *  _molecular / _Denominator) * totalAmount *  1 / 3 / 100000)
             )
             * 80 / 100; 
