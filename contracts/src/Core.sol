@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-
+import "../lib/forge-std/src/Test.sol";
 contract Core{
     uint256 constant THREEMONTHS = 90 days;
     uint256 constant SIXMONTHS = 180 days;
@@ -15,8 +15,10 @@ contract Core{
     }
     // 用户=>歌手=>专辑名单(包括历史订阅与目前订阅)
     mapping(address=>mapping(address=>bytes4[])) internal userDescribeAlbumList;
-    // 用户=>歌手=>专辑=>是否订阅
+    // 用户=>歌手=>专辑=>是否购买
     mapping(address=>mapping(address=>mapping(bytes4=>bool))) internal userDescribeAlbums;
+    // 用户=>购买的歌手专辑的集合(包括历史订阅与目前订阅)
+    mapping(address=>address[]) internal userDescribeAlbumsHelper;
 
     // 歌手=>普通歌曲池子
     mapping(address=>songPool) public singerSongs;
@@ -80,7 +82,7 @@ contract Core{
         _;
     }
 
-    mapping(address=>uint256) public isReadyForDescribe;
+    mapping(address=>uint256) internal isReadyForDescribe;
     function readyForDescribe() external {
         isReadyForDescribe[msg.sender] = block.timestamp;
     }
@@ -179,6 +181,7 @@ contract Core{
                 // 买方得到权益
                 userDescribeAlbumList[msg.sender][_singer].push(_albumName);
                 userDescribeAlbums[msg.sender][_singer][_albumName] = true;
+                userDescribeAlbumsHelper[msg.sender].push(_singer);
                 // 卖方失去权益
                 userDescribeAlbums[seller][_singer][_albumName] = false;
 
@@ -187,6 +190,7 @@ contract Core{
             }else{ // 没的话就买
                 userDescribeAlbumList[msg.sender][_singer].push(_albumName);
                 userDescribeAlbums[msg.sender][_singer][_albumName] = true;
+                userDescribeAlbumsHelper[msg.sender].push(_singer);
                 singerAlbums[_singer][_albumName].totalReward += singerAlbums[_singer][_albumName].price;
 
                 emit DescribeAlnum(_singer, msg.sender, _albumName);
@@ -259,7 +263,7 @@ contract Core{
         emit InvestSinger(_musicPlatform,  _singer, amount);
     }
 
-    // 每个投资季度开始，owner将投资池，然后进行新一轮的投资
+    // 每个投资季度开始，owner将投资池清空，发送收益到各方，然后进行新一轮的投资
     function allocMoney(
         address[] memory _singer, 
         address[][] memory _musicPlatform, 
@@ -395,11 +399,23 @@ contract Core{
         return result;
     }
     // =====  用户订阅了哪些专辑  ===
-    function getUserDescribeAlbumList(address _user, address _singer) public returns(bytes4[] memory){
-        uint256 len = userDescribeAlbumList[_user][_singer].length;
-        bytes4[] memory result = new bytes4[](len);
-        for(uint256 i = 0; i < len; i++){
-            result[i] = userDescribeAlbumList[_user][_singer][i];
+    function getUserDescribeAlbumList(address _user) public returns(bytes4[] memory){
+        uint256 singerLen = userDescribeAlbumsHelper[_user].length;
+        uint256 albumLen = 0; // 算出一共有多少个专辑，这样好分配内存空间
+        for(uint256 i = 0; i < singerLen; i++){
+            address singer = userDescribeAlbumsHelper[_user][i]; // 遍历每个歌手
+            albumLen += userDescribeAlbumList[_user][singer].length;
+        }
+
+        bytes4[] memory result = new bytes4[](albumLen);
+        uint256 k = 0;
+        for(uint256 i = 0; i < singerLen; i++){
+            address singer = userDescribeAlbumsHelper[_user][i]; // 遍历每个歌手
+            uint256 albumLen_ = userDescribeAlbumList[_user][singer].length;
+            for(uint256 j = 0; j < albumLen_; j++){
+                result[k] = userDescribeAlbumList[_user][singer][j];
+                k++;
+            }
         }
         return result;
     }

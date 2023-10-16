@@ -113,6 +113,7 @@ contract CoreTest is Test {
         vm.expectEmit(true, true, true, true);
         emit SwapRightAlbum(singer01, user02, user04, hex"00000001");
         core.describe{value: 9999999999}(singer01, hex"00000001",0);
+        // bytes4[] memory aaaaaaaa = core.getUserDescribeAlbumList(user04);
         uint256 balUser02After_ = user02.balance;
         // 检查：是user04从user02手中买，而不是重新订阅
         assertEq(core.isDescribe(user02, singer01, hex"00000001"), false);
@@ -124,6 +125,7 @@ contract CoreTest is Test {
         vm.expectEmit(true, true, true, true);
         emit DescribeAlnum(singer01, user05, hex"00000001");
         core.describe{value: 9999999999}(singer01, hex"00000001",0);
+        // bytes4[] memory aaaaaaaa = core.getUserDescribeAlbumList(user05); // [0x00000001]
         // bytes4[] memory te = core.getUserDescribeAlbumList(user01,singer01); // [0x00000001]
         // 检查：user05订阅专辑成功
         assertEq(core.isDescribe(user05, singer01, hex"00000001"), true);
