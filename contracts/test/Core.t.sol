@@ -60,6 +60,7 @@ contract CoreTest is Test {
         core.updateSongAndAlbum(100000, hex"00000000");
         // 上传专辑
         core.updateSongAndAlbum(9999999999, hex"00000001");
+        // bytes4[] memory test = core.getSingerAlbumsList(singer01); // [0x00000001]
         vm.stopBroadcast();
 
         vm.startBroadcast(user01);
@@ -100,11 +101,11 @@ contract CoreTest is Test {
         uint256 balUser01After = user01.balance;
         uint256 balUser02After = user02.balance;
         // 检查：是user03从user01手中买，而不是重新订阅
-        assertEq(core.userDescribeAlbums(user01,singer01,hex"00000001"), false);
+        assertEq(core.isDescribe(user01, singer01, hex"00000001"), false);
         assertEq(balUser01Before + 9999999999, balUser01After);
         // 检查：user02的权益尚未在市场交易走
         assertEq(balUser02Before, balUser02After);
-        assertEq(core.userDescribeAlbums(user02,singer01,hex"00000001"), true);
+        assertEq(core.isDescribe(user02, singer01, hex"00000001"), true);
         vm.stopBroadcast();
 
         vm.startBroadcast(user04);
@@ -114,8 +115,8 @@ contract CoreTest is Test {
         core.describe{value: 9999999999}(singer01, hex"00000001",0);
         uint256 balUser02After_ = user02.balance;
         // 检查：是user04从user02手中买，而不是重新订阅
-        assertEq(core.userDescribeAlbums(user02,singer01,hex"00000001"), false);
-        assertEq(core.userDescribeAlbums(user04,singer01,hex"00000001"), true);
+        assertEq(core.isDescribe(user02, singer01, hex"00000001"), false);
+        assertEq(core.isDescribe(user04, singer01, hex"00000001"), true);
         assertEq(balUser02Before_ + 9999999999, balUser02After_);
         vm.stopBroadcast();
 
@@ -123,8 +124,9 @@ contract CoreTest is Test {
         vm.expectEmit(true, true, true, true);
         emit DescribeAlnum(singer01, user05, hex"00000001");
         core.describe{value: 9999999999}(singer01, hex"00000001",0);
+        // bytes4[] memory te = core.getUserDescribeAlbumList(user01,singer01); // [0x00000001]
         // 检查：user05订阅专辑成功
-        assertEq(core.userDescribeAlbums(user05,singer01,hex"00000001"), true);
+        assertEq(core.isDescribe(user05, singer01, hex"00000001"), true);
         vm.stopBroadcast();
 
         vm.startBroadcast(user01);
@@ -191,6 +193,8 @@ contract CoreTest is Test {
         _amount[1][1] = 3 ether;
         // 每一期，owner进行投资操作
         core.investSinger{value: 12 ether}(_musicPlatform, _singer, _amount);
+        // 返回值：[0x0000000000000000000000000000000000000066, 0x0000000000000000000000000000000000000077]
+        // address[] memory xx = core.getMusicInvestSingers(musicPlatform01);
 
         vm.startBroadcast(singer01);
         core.updateSongAndAlbum(100, hex"00000000"); // /singer01注册成为歌手，并设置订阅金额为100
@@ -202,6 +206,8 @@ contract CoreTest is Test {
         vm.startBroadcast(user01);
         core.describe{value: 100}(singer01, hex"00000000",0); // 订阅歌手singer01
         core.describe{value: 200}(singer02, hex"00000000",0); // 订阅歌手singer02
+        // 下面的返回值得到：[0x0000000000000000000000000000000000000066, 0x0000000000000000000000000000000000000077]
+        // address[] memory tee = core.getUserDescribeSingerList(user01);
         vm.stopBroadcast();
 
         // 检查：计算投资回报公式是否正确

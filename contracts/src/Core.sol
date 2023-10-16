@@ -1,31 +1,31 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.21;
 
 contract Core{
     uint256 constant THREEMONTHS = 90 days;
     uint256 constant SIXMONTHS = 180 days;
 
     // 用户=>歌手名单(包括历史订阅与目前订阅)
-    mapping(address=>address[]) public userDescribeSingersList;
+    mapping(address=>address[]) internal userDescribeSingersList;
     // 用户=>歌手=>目前是否订阅(根据时间)
-    mapping(address=>mapping(address=>userTimeHelper)) public userDescribeSingers;
+    mapping(address=>mapping(address=>userTimeHelper)) internal userDescribeSingers;
     struct userTimeHelper{
         uint256 start;
         uint256 end;
     }
     // 用户=>歌手=>专辑名单(包括历史订阅与目前订阅)
-    mapping(address=>mapping(address=>bytes4[])) public userDescribeAlbumList;
+    mapping(address=>mapping(address=>bytes4[])) internal userDescribeAlbumList;
     // 用户=>歌手=>专辑=>是否订阅
-    mapping(address=>mapping(address=>mapping(bytes4=>bool))) public userDescribeAlbums;
+    mapping(address=>mapping(address=>mapping(bytes4=>bool))) internal userDescribeAlbums;
 
     // 歌手=>普通歌曲池子
     mapping(address=>songPool) public singerSongs;
     // 歌手=>专辑池子
-    mapping(address=>bytes4[]) public singerAlbumsList;
+    mapping(address=>bytes4[]) internal singerAlbumsList;
     mapping(address=>mapping(bytes4=>albumPool)) public singerAlbums;
 
     // 音乐平台=>歌手
-    mapping(address=>address[]) public musicPlatform;
+    mapping(address=>address[]) internal musicPlatform;
 
     // 池子：每一歌手对应一个结构体
     struct songPool{
@@ -45,16 +45,16 @@ contract Core{
     }
 
     // 歌手=>想出售的用户。用mapping实现FIFO
-    mapping(address=>mapping(uint256=>address)) public swapSongMarket;
-    mapping(address=>queueSongCount) public queueSongNumber;
+    mapping(address=>mapping(uint256=>address)) internal swapSongMarket;
+    mapping(address=>queueSongCount) internal queueSongNumber;
     struct queueSongCount{
         uint256 first;
         uint256 last;
     }
 
     // 歌手=>专辑=>想出售的用户。用mapping实现FIFO
-    mapping(address=>mapping(bytes4=>mapping(uint256=>address))) public swapAlbumMarket;
-    mapping(address=>mapping(bytes4=>queueAlbumCount)) public queueAlbumNumber;
+    mapping(address=>mapping(bytes4=>mapping(uint256=>address))) internal swapAlbumMarket;
+    mapping(address=>mapping(bytes4=>queueAlbumCount)) internal queueAlbumNumber;
     struct queueAlbumCount{
         uint256 first;
         uint256 last;
@@ -195,17 +195,6 @@ contract Core{
 
     }
 
-    // 查看是否订阅歌手或者购买专辑
-    function isDescribe(address _user, address _singer, bytes4 _albumName) public view returns(bool){
-        if(_albumName == hex"00000000"){
-            return userDescribeSingers[_user][_singer].start <= block.timestamp 
-                && 
-                    block.timestamp <= userDescribeSingers[_user][_singer].end;
-        }else{
-            return userDescribeAlbums[_user][_singer][_albumName] == true;
-        }
-    }
-
     // 用户：转移权益：歌手或者专辑
     function transferUserRightPending(address _singer, bytes4 _albumName) external{
         if(_albumName == hex"00000000"){ // 歌手
@@ -261,6 +250,8 @@ contract Core{
                 singerSongs[_singer[j]].musicPlatform.push(_musicPlatform[i]);
                 singerSongs[_singer[j]].musicPlatformAmount[_musicPlatform[i]] += amount[i][j];
                 totalAmount += amount[i][j];
+
+                musicPlatform[_musicPlatform[i]].push(_singer[j]);
             }
         }
         require(msg.value >= totalAmount, "not enough investMoney");
@@ -268,10 +259,56 @@ contract Core{
         emit InvestSinger(_musicPlatform,  _singer, amount);
     }
 
+    // 每个投资季度开始，owner将投资池，然后进行新一轮的投资
+    function allocMoney(
+        address[] memory _singer, 
+        address[][] memory _musicPlatform, 
+        uint256[][] memory _molecular, 
+        uint256[] memory _Denominator
+    ) external onlyOwner{
+        uint256 singerLength = _singer.length;
+
+        // 分配充值池的钱
+        for(uint256 i = 0; i < singerLength; i++){
+            // 歌手
+            payable(_singer[i]).transfer(calReward(_singer[i], address(0), address(0),0,0));
+            // 手续费
+            payable(owner).transfer(calReward(_singer[i],address(0), owner,0,0));
+            for(uint256 j = 0; j < _musicPlatform[i].length; j++){
+                // 音乐平台
+                payable(_musicPlatform[i][j]).transfer(calReward(_singer[i], _musicPlatform[i][j], address(0), _molecular[i][j], _Denominator[i]));
+            }
+        }
+        // 分配投资池的钱
+        for(uint256 i = 0; i < singerLength; i++){
+            uint256 totalInvest = singerSongs[_singer[i]].totalAmount;
+            payable(_singer[i]).transfer(totalInvest * 80 / 100); // 歌手
+            payable(_singer[i]).transfer(totalInvest * 20 / 100); // 手续费
+        }
+
+        // 清空投资池
+        for(uint256 i = 0; i < singerLength; i++){
+            singerSongs[_singer[i]].totalAmount = 0;
+        }
+        
+        emit AllocMoney(_singer,  _musicPlatform, _molecular,  _Denominator);
+    }
+
+// ===========================   view  ===============================
+// ===========================   view  ===============================
+
+    // =====  公共  ====
+    // 市场中有多少歌曲或者专辑在卖
+    function marketLength(address _singer, bytes4 _albumName) external view returns(uint256){
+        if(_albumName == hex"00000000"){ // 普通歌曲
+            return queueSongNumber[_singer].last - queueSongNumber[_singer].first;
+        }else{ // 专辑
+            return queueAlbumNumber[_singer][_albumName].last - queueAlbumNumber[_singer][_albumName].first;
+        }
+    }
     // 用于计算用户支付订阅和专辑的钱。因为每个季度分配钱之后，历史的收入不会刷新，因此需要一个变量记录上一次的收入，
     // 然后相减，就可以得到上次分配钱之后，又有多少新的收入（新一轮股市）
-    mapping(address=>uint256) public lastRewardAmount;
-
+    mapping(address=>uint256) internal lastRewardAmount;
     // 计算充值池收益：歌手收益、音乐平台收益、接口平台手续费 
     function calReward(
         address _singer, 
@@ -315,48 +352,56 @@ contract Core{
         }
     }
 
-    // 每个投资季度开始，owner将投资池，然后进行新一轮的投资
-    function allocMoney(
-        address[] memory _singer, 
-        address[][] memory _musicPlatform, 
-        uint256[][] memory _molecular, 
-        uint256[] memory _Denominator
-    ) external onlyOwner{
-        uint256 singerLength = _singer.length;
-
-        // 分配充值池的钱
-        for(uint256 i = 0; i < singerLength; i++){
-            // 歌手
-            payable(_singer[i]).transfer(calReward(_singer[i], address(0), address(0),0,0));
-            // 手续费
-            payable(owner).transfer(calReward(_singer[i],address(0), owner,0,0));
-            for(uint256 j = 0; j < _musicPlatform[i].length; j++){
-                // 音乐平台
-                payable(_musicPlatform[i][j]).transfer(calReward(_singer[i], _musicPlatform[i][j], address(0), _molecular[i][j], _Denominator[i]));
-            }
+    // 歌手
+    // =====  歌手的所有专辑  ===
+    function getSingerAlbumsList(address _singer) public view returns(bytes4[] memory){
+        uint256 len = singerAlbumsList[_singer].length;
+        bytes4[] memory result = new bytes4[](len);
+        for(uint256 i = 0; i < len; i++){
+            result[i] = singerAlbumsList[_singer][i];
         }
-        // 分配投资池的钱
-        for(uint256 i = 0; i < singerLength; i++){
-            uint256 totalInvest = singerSongs[_singer[i]].totalAmount;
-            payable(_singer[i]).transfer(totalInvest * 80 / 100); // 歌手
-            payable(_singer[i]).transfer(totalInvest * 20 / 100); // 手续费
-        }
-
-        // 清空投资池
-        for(uint256 i = 0; i < singerLength; i++){
-            singerSongs[_singer[i]].totalAmount = 0;
-        }
-        
-        emit AllocMoney(_singer,  _musicPlatform, _molecular,  _Denominator);
+        return result;
     }
 
-    // 查看：市场中有多少歌曲或者专辑在卖
-    function marketLength(address _singer, bytes4 _albumName) external view returns(uint256){
-        if(_albumName == hex"00000000"){ // 普通歌曲
-            return queueSongNumber[_singer].last - queueSongNumber[_singer].first;
-        }else{ // 专辑
-            return queueAlbumNumber[_singer][_albumName].last - queueAlbumNumber[_singer][_albumName].first;
+    // 音乐平台
+    // =====  查看自己所有投资的歌手  ===
+    function getMusicInvestSingers(address _musicPlatform) public view returns(address[] memory){
+        uint256 len = musicPlatform[_musicPlatform].length;
+        address[] memory result = new address[](len);
+        for(uint256 i = 0; i < len; i++){
+            result[i] = musicPlatform[_musicPlatform][i];
         }
+        return result;
+    }
+
+    // 用户
+    // =====  是否订阅歌手或者购买专辑  ===
+    function isDescribe(address _user, address _singer, bytes4 _albumName) public view returns(bool){
+        if(_albumName == hex"00000000"){
+            return userDescribeSingers[_user][_singer].start <= block.timestamp 
+                && 
+                    block.timestamp <= userDescribeSingers[_user][_singer].end;
+        }else{
+            return userDescribeAlbums[_user][_singer][_albumName] == true;
+        }
+    }
+    // =====  用户订阅了哪些歌手  ===
+    function getUserDescribeSingerList(address _addr) public view returns(address[] memory){
+        uint256 len = userDescribeSingersList[_addr].length;
+        address[] memory result = new address[](len);
+        for(uint256 i = 0; i < len; i++){
+            result[i] = userDescribeSingersList[_addr][i];
+        }
+        return result;
+    }
+    // =====  用户订阅了哪些专辑  ===
+    function getUserDescribeAlbumList(address _user, address _singer) public returns(bytes4[] memory){
+        uint256 len = userDescribeAlbumList[_user][_singer].length;
+        bytes4[] memory result = new bytes4[](len);
+        for(uint256 i = 0; i < len; i++){
+            result[i] = userDescribeAlbumList[_user][_singer][i];
+        }
+        return result;
     }
 
 }
