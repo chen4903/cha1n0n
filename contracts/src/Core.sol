@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "../lib/forge-std/src/Test.sol";
+
 contract Core{
     uint256 constant THREEMONTHS = 90 days;
     uint256 constant SIXMONTHS = 180 days;
@@ -399,7 +399,7 @@ contract Core{
         return result;
     }
     // =====  用户订阅了哪些专辑  ===
-    function getUserDescribeAlbumList(address _user) public returns(bytes4[] memory){
+    function getUserDescribeAlbumList(address _user) public view returns(bytes4[] memory){
         uint256 singerLen = userDescribeAlbumsHelper[_user].length;
         uint256 albumLen = 0; // 算出一共有多少个专辑，这样好分配内存空间
         for(uint256 i = 0; i < singerLen; i++){
