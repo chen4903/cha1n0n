@@ -3,8 +3,12 @@ import "~/styles/globals.css";
 import { headers } from "next/headers";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Poppins, Kanit } from "next/font/google";
-import { Provider } from "./_components/provider";
 import { AnimateEnter } from "./_components/animate-enter";
+
+import { Blur } from "./_components/blur";
+import { Sidebar } from "./_components/sider";
+import { ToastContainer } from "react-toastify";
+import { Provider } from "./_components/provider";
 
 import type { Metadata } from "next";
 
@@ -42,15 +46,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`font-sans ${poppins.variable} ${kanit.variable} bg-background font-poppins relative flex min-h-screen justify-center outline-none`}
+        className={`font-sans ${poppins.variable} ${kanit.variable} min-h-screen font-poppins bg-background outline-none`}
       >
+        <Blur />
         <TRPCReactProvider headers={headers()}>
           <Provider>
-            <AnimateEnter className="max-w-9xl mx-auto flex flex-col px-8 lg:flex-row lg:gap-10 lg:py-20">
+            <AnimateEnter className="mx-auto flex max-w-6xl flex-col px-8 lg:flex-row lg:gap-10 lg:py-16">
+              <Sidebar />
               {children}
             </AnimateEnter>
           </Provider>
         </TRPCReactProvider>
+        <ToastContainer />
       </body>
     </html>
   );
