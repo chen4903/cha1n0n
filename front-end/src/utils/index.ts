@@ -22,7 +22,20 @@ export function absoluteUrl(path: string) {
 
 export const stringToBytes4 = (str: string) => {
   const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(str));
-  console.log("hash", hash.substring(0, 10));
-
   return hash.substring(0, 10);
+};
+
+export function isEOAAddress(address: string): boolean {
+  return ethers.utils.isAddress(address);
+}
+
+export const stringToBytes8 = (str: string) => {
+  const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(str));
+
+  return `"0x${hash.substring(2, 18)}`;
+};
+
+export const isBytes4 = (input: string) => {
+  const regExp = /^0x[0-9A-Fa-f]{8}$/;
+  return regExp.test(input);
 };
