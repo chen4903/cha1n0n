@@ -22,7 +22,6 @@ export default {
         foreground: "#d4d4d4",
         background: "#08070B",
         input: "#131415",
-        muidground: "#18181B",
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
