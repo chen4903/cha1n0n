@@ -6,6 +6,7 @@ import arrowIcon from "public/icons/static/arrow.json";
 
 import { usePathname } from "next/navigation";
 import { MarketLenth } from "./marketLength";
+import { SingerSongs } from "./singer-songs";
 
 export function Modal() {
   const pathname = usePathname();
@@ -15,6 +16,7 @@ export function Modal() {
     <div className="hidden flex-col gap-1.5 lg:flex">
       <Divider className="mb-4" />
       <MarketLenth />
+      <SingerSongs />
     </div>
   );
 }

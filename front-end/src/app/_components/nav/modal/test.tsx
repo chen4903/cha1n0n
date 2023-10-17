@@ -8,17 +8,23 @@ import { Modal, ModalContent, ModalHeader } from "@nextui-org/react";
 import { Tabs, Tab, Card, CardBody, CardHeader } from "@nextui-org/react";
 import { useDisclosure, ModalBody, ModalFooter } from "@nextui-org/react";
 
-import { cn, isEOAAddress } from "~/utils";
 import { toast } from "react-toastify";
+import { cn, isEOAAddress, isBytes4 } from "~/utils";
 import { useForm, Resolver } from "react-hook-form";
 import { useHooks } from "~/app/_components/provider";
 import { useMarketLengthMusic } from "~/hooks/read/marketLength";
+import { useMarketLengthMusicAlbum } from "~/hooks/read/marketLengthAlbum";
 
 type FormValues = {
   singer: string;
 };
 
-export function MarketLenth() {
+type FormValuesAlbum = {
+  singerAddress: string;
+  name: string;
+};
+
+export function SingerSongs() {
   const arrowRef = React.useRef<any>();
 
   const { signer } = useHooks();
@@ -27,18 +33,15 @@ export function MarketLenth() {
 
   const [singer, setSinger] = React.useState("");
 
-  const [selected, setSelected] = React.useState("music");
+  const [name, setName] = React.useState("");
 
-  const [payType, setPayType] = React.useState("system");
+  const [selected, setSelected] = React.useState("music");
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const { register, handleSubmit } = useForm<FormValues>();
 
-  const handleRadioChange = (value: string) => {
-    setPayType(value);
-    console.log(value);
-  };
+  const res = useForm<FormValuesAlbum>();
 
   const handleSelectionChange = (key: React.Key) => {
     if (typeof key === "string") {
@@ -46,20 +49,8 @@ export function MarketLenth() {
     }
   };
 
-  const handleMarketLengthMusic = async (singer: string) => {
-    const result = await signer.marketLength(
-      singer,
-      Buffer.from("00000000", "hex"),
-    );
-    console.log(result);
-  };
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    handleMarketLengthMusic(singer);
-  };
-
   const onSubmit = handleSubmit((data) => {
-    console.log("提交", data.singer);
+    setSinger(data.singer);
     if (!isEOAAddress(data.singer)) {
       toast.error("🦄 Please check input", {
         position: "top-right",
@@ -73,19 +64,120 @@ export function MarketLenth() {
       });
       return;
     }
-    setSinger(data.singer);
+
     setIsHidden(false);
-    // handleMarketLengthMusic(data.singer);
+  });
+
+  const onSubmitAlbum = res.handleSubmit((data) => {
+    setSinger(data.singerAddress);
+    setName(data.name);
+    console.log("data.singer", data.singerAddress);
+    console.log("data.naem", data.name);
+    if (!isEOAAddress(data.singerAddress)) {
+      toast.error(singer, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      toast.error("🦄 Please check input", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
+
+    if (!isBytes4(name)) {
+      toast.error("🦄 Please check name input", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
+    setIsHidden(false);
   });
 
   const { marketLengthMusic } = useMarketLengthMusic({ singer: singer });
+
+  const { marketLengthMusicAlbum } = useMarketLengthMusicAlbum({
+    singer: singer,
+    name: name,
+  });
 
   const handleIshidden = () => {
     setIsHidden(true);
   };
 
   const handleUseMarketLengthMusic = () => {
-    toast(`"🦄 ${marketLengthMusic}"`, {
+    if (singer.length !== 42) {
+      toast.error("🦄 Please check input", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
+    toast(`🦄 ${marketLengthMusic}`, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+  };
+
+  const handleUseMarketLengthAlbum = () => {
+    if (singer.length !== 42) {
+      toast.error("🦄 Please check address input", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
+    if (!isBytes4(name)) {
+      toast.error("🦄 Please check name input", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
+    toast(`🦄 ${marketLengthMusicAlbum}`, {
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -149,16 +241,6 @@ export function MarketLenth() {
                         {...register("singer")}
                       />
                       <ModalFooter className="items-center justify-between pl-0 pt-6">
-                        <RadioGroup
-                          orientation="horizontal"
-                          onValueChange={handleRadioChange}
-                          defaultValue="system"
-                        >
-                          <Radio value="system">system</Radio>
-                          <Radio value="self" color="secondary">
-                            self
-                          </Radio>
-                        </RadioGroup>
                         <div className="flex items-center gap-4">
                           <Button
                             color="danger"
@@ -193,42 +275,86 @@ export function MarketLenth() {
                           <Button
                             color="default"
                             size="sm"
-                            onClick={
-                              payType === "system"
-                                ? handleClick
-                                : handleUseMarketLengthMusic
-                            }
+                            onClick={handleUseMarketLengthMusic}
                             className={cn(
                               " bg-gradient-to-tr from-pink-500 to-yellow-500 text-white shadow-lg",
                               isHidden ? "hidden" : "",
                             )}
                           >
-                            Start
+                            Quary
                           </Button>
                         </div>
                       </ModalFooter>
                     </form>
                   </Tab>
                   <Tab key="album" title="Album">
-                    <Input
-                      autoFocus
-                      label="Singer Address"
-                      variant="bordered"
-                    />
-                    <Input
-                      label="Password"
-                      placeholder="Enter your password"
-                      type="password"
-                      variant="bordered"
-                    />
-                    <ModalFooter>
-                      <Button color="danger" variant="flat" onPress={onClose}>
-                        Close
-                      </Button>
-                      <Button color="primary" onPress={onClose}>
-                        Sign in
-                      </Button>
-                    </ModalFooter>
+                    <form onSubmit={onSubmitAlbum}>
+                      <Input
+                        autoFocus
+                        label="Singer address"
+                        placeholder="Enter singer address"
+                        variant="bordered"
+                        required
+                        min={42}
+                        {...res.register("singerAddress")}
+                      />
+
+                      <Input
+                        autoFocus
+                        label="Album name"
+                        placeholder="Enter album name"
+                        variant="bordered"
+                        required
+                        min={0}
+                        className="mt-4"
+                        {...res.register("name")}
+                      />
+                      <ModalFooter className="items-center justify-between pl-0 pt-6">
+                        <div className="flex items-center gap-4">
+                          <Button
+                            color="danger"
+                            size="sm"
+                            variant="flat"
+                            onPress={onClose}
+                          >
+                            Close
+                          </Button>
+                          <Button
+                            color="primary"
+                            size="sm"
+                            type="submit"
+                            className={cn(
+                              "bg-pink-600 text-white shadow-lg",
+                              !isHidden ? "hidden" : "",
+                            )}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            color="primary"
+                            size="sm"
+                            onClick={handleIshidden}
+                            className={cn(
+                              "bg-pink-600 text-white shadow-lg",
+                              isHidden ? "hidden" : "",
+                            )}
+                          >
+                            rewrite
+                          </Button>
+                          <Button
+                            color="default"
+                            size="sm"
+                            onClick={handleUseMarketLengthAlbum}
+                            className={cn(
+                              " bg-gradient-to-tr from-pink-500 to-yellow-500 text-white shadow-lg",
+                              isHidden ? "hidden" : "",
+                            )}
+                          >
+                            Quary
+                          </Button>
+                        </div>
+                      </ModalFooter>
+                    </form>
                   </Tab>
                 </Tabs>
               </ModalBody>
