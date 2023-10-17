@@ -1,4 +1,5 @@
 import "~/styles/globals.css";
+import 'react-toastify/dist/ReactToastify.css';
 
 import { headers } from "next/headers";
 import { TRPCReactProvider } from "~/trpc/react";
@@ -46,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`font-sans ${poppins.variable} ${kanit.variable} font-poppins bg-background min-h-screen outline-none`}
+        className={`font-sans ${poppins.variable} ${kanit.variable} min-h-screen bg-background font-poppins outline-none`}
       >
         <Blur />
         <TRPCReactProvider headers={headers()}>
@@ -54,10 +55,10 @@ export default function RootLayout({
             <AnimateEnter className="mx-auto flex max-w-6xl flex-col px-8 lg:flex-row lg:gap-10 lg:py-16">
               <Sidebar />
               {children}
+              <ToastContainer />
             </AnimateEnter>
           </Provider>
         </TRPCReactProvider>
-        <ToastContainer />
       </body>
     </html>
   );
