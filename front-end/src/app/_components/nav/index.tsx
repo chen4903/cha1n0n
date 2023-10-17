@@ -31,9 +31,9 @@ export function Navigation() {
         onMouseEnter={() => homeRef.current?.play()}
         onMouseLeave={() => homeRef.current?.stop()}
         className={clsx(
-          "text-foreground flex items-center gap-2 rounded-lg px-2.5 py-2 duration-300 hover:bg-neutral-800",
+          "flex items-center gap-2 rounded-lg px-2.5 py-2 text-foreground duration-300 hover:bg-neutral-800",
           {
-            "text-primary bg-neutral-800": pathname === "/",
+            "bg-neutral-800 text-primary": pathname === "/",
           },
         )}
       >
@@ -54,9 +54,9 @@ export function Navigation() {
         onMouseEnter={() => marketIconRef.current?.play()}
         onMouseLeave={() => marketIconRef.current?.stop()}
         className={clsx(
-          "text-foreground flex items-center gap-2 rounded-lg px-2.5 py-2 duration-300 hover:bg-neutral-800",
+          "flex items-center gap-2 rounded-lg px-2.5 py-2 text-foreground duration-300 hover:bg-neutral-800",
           {
-            "text-primary bg-neutral-800": pathname === "/market",
+            "bg-neutral-800 text-primary": pathname === "/market",
           },
         )}
       >
