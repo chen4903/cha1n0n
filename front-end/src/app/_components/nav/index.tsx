@@ -1,26 +1,31 @@
 "use client";
 
-import { useRef } from "react";
 import { useAtom } from "jotai";
 import { roleAtom } from "~/utils/atom";
 import { usePathname } from "next/navigation";
 
 import clsx from "clsx";
-import Link from "next/link";
-import Lottie from "lottie-react";
-import homeIcon from "public/icons/static/home.json";
+import React from "react";
 import UserNav from "./user";
+import Link from "next/link";
+import { Modal } from "./modal";
 import SingerNav from "./singer";
+import Lottie from "lottie-react";
+import { Divider } from "../divider";
+import homeIcon from "public/icons/static/home.json";
+import marketIcon from "public/icons/static/market.json";
 
 export function Navigation() {
-  const homeRef = useRef<any>();
+  const homeRef = React.useRef<any>();
+
+  const marketIconRef = React.useRef<any>();
 
   const pathname = usePathname();
 
   const [role] = useAtom(roleAtom);
 
   return (
-    <nav className="mb-4 hidden flex-col lg:flex">
+    <nav className="hidden flex-col gap-1.5 lg:flex">
       <Link
         href="/"
         onMouseEnter={() => homeRef.current?.play()}
@@ -41,8 +46,30 @@ export function Navigation() {
         />
         <span className="text-sm capitalize">home</span>
       </Link>
+
       {role === "user" ? <UserNav /> : null}
       {/* {role === "singer" ? <SingerNav /> : null} */}
+      <Link
+        href="/market"
+        onMouseEnter={() => marketIconRef.current?.play()}
+        onMouseLeave={() => marketIconRef.current?.stop()}
+        className={clsx(
+          "text-foreground flex items-center gap-2 rounded-lg px-2.5 py-2 duration-300 hover:bg-neutral-800",
+          {
+            "text-primary bg-neutral-800": pathname === "/market",
+          },
+        )}
+      >
+        <Lottie
+          lottieRef={marketIconRef}
+          animationData={marketIcon}
+          style={{ width: 24, height: 24 }}
+          autoplay={false}
+          loop={false}
+        />
+        <span className="text-sm capitalize">market</span>
+      </Link>
+      <Modal />
     </nav>
   );
 }
