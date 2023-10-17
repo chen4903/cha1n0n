@@ -44,9 +44,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
-        className={`font-sans ${poppins.variable} ${kanit.variable} min-h-screen font-poppins bg-background outline-none`}
+        className={`font-sans ${poppins.variable} ${kanit.variable} font-poppins bg-background min-h-screen outline-none`}
       >
         <Blur />
         <TRPCReactProvider headers={headers()}>

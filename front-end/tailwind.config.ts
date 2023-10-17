@@ -1,5 +1,8 @@
-import { type Config } from "tailwindcss";
+const { nextui } = require("@nextui-org/react");
+
 import { fontFamily } from "tailwindcss/defaultTheme";
+
+import { type Config } from "tailwindcss";
 
 export default {
   content: ["./src/**/*.tsx"],
@@ -28,5 +31,13 @@ export default {
       },
     },
   },
-  plugins: [require("daisyui")],
+  plugins: [
+    require("daisyui"),
+    nextui({
+      prefix: "cha1non",
+      addCommonColors: false,
+      defaultTheme: "dark",
+      defaultExtendTheme: "dark",
+    }),
+  ],
 } satisfies Config;

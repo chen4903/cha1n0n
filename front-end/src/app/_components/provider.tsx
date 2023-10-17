@@ -5,6 +5,7 @@ import { env } from "~/env.mjs";
 import { ethers } from "ethers";
 import { hardhat, goerli } from "wagmi/chains";
 import { SessionProvider } from "next-auth/react";
+import { NextUIProvider } from "@nextui-org/react";
 import { darkTheme } from "@rainbow-me/rainbowkit";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
@@ -91,7 +92,9 @@ export function Provider({ children }: { children: React.ReactNode }) {
             modalSize="compact"
             theme={darkTheme()}
           >
-            <AppContext.Provider value={value}>{children}</AppContext.Provider>
+            <AppContext.Provider value={value}>
+              <NextUIProvider>{children}</NextUIProvider>
+            </AppContext.Provider>
           </RainbowKitProvider>
         </RainbowKitSiweNextAuthProvider>
       </WagmiConfig>
