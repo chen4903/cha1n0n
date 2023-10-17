@@ -19,12 +19,10 @@ export default function UserNav() {
   const pathname = usePathname();
   return (
     <motion.div
-      key="modal"
       exit={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      initial={{ opacity: 0, y: 10 }}
-      className="space-y-2"
+      className="sapce-y-1.5"
     >
       <Link
         href="/subscribe"
@@ -66,7 +64,6 @@ export default function UserNav() {
         />
         <span className="text-sm">Platform</span>
       </Link>
-      <Divider />
     </motion.div>
   );
 }
