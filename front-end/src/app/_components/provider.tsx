@@ -4,14 +4,18 @@ import React from "react";
 import { env } from "~/env.mjs";
 import { ethers } from "ethers";
 import { hardhat, goerli } from "wagmi/chains";
+import { SessionProvider } from "next-auth/react";
 import { darkTheme } from "@rainbow-me/rainbowkit";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { RainbowKitSiweNextAuthProvider } from "@rainbow-me/rainbowkit-siwe-next-auth";
 
 import abi from "~/config/abi.json";
 import "@rainbow-me/rainbowkit/styles.css";
+
+import type { GetSiweMessageOptions } from "@rainbow-me/rainbowkit-siwe-next-auth";
 
 interface ContextProps {
   signer: ethers.Contract;
@@ -42,9 +46,13 @@ const config = createConfig({
   webSocketPublicClient,
 });
 
-const demoAppInfo = {
+const cha1n0nAppInfo = {
   appName: "cha1n0n Demo",
 };
+
+const getSiweMessageOptions: GetSiweMessageOptions = () => ({
+  statement: "Sign in to the cha1n0n",
+});
 
 const provider = new ethers.providers.JsonRpcProvider(
   env.NEXT_PUBLIC_RPC_Provider,
@@ -72,16 +80,22 @@ export function Provider({ children }: { children: React.ReactNode }) {
     signer: contractWithSigner,
   };
   return (
-    <WagmiConfig config={config}>
-      <RainbowKitProvider
-        appInfo={demoAppInfo}
-        chains={chains}
-        modalSize="compact"
-        theme={darkTheme()}
-      >
-        <AppContext.Provider value={value}>{children}</AppContext.Provider>
-      </RainbowKitProvider>
-    </WagmiConfig>
+    <SessionProvider refetchInterval={0}>
+      <WagmiConfig config={config}>
+        <RainbowKitSiweNextAuthProvider
+          getSiweMessageOptions={getSiweMessageOptions}
+        >
+          <RainbowKitProvider
+            appInfo={cha1n0nAppInfo}
+            chains={chains}
+            modalSize="compact"
+            theme={darkTheme()}
+          >
+            <AppContext.Provider value={value}>{children}</AppContext.Provider>
+          </RainbowKitProvider>
+        </RainbowKitSiweNextAuthProvider>
+      </WagmiConfig>
+    </SessionProvider>
   );
 }
 

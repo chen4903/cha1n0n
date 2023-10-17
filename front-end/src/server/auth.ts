@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { getCsrfToken } from "next-auth/react";
+import { SiweMessage } from "siwe";
 
 import { env } from "~/env.mjs";
 import { db } from "~/server/db";
@@ -19,15 +22,8 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
     } & DefaultSession["user"];
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
 }
 
 /**
@@ -37,29 +33,96 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
+    session: ({ session, token }) => ({
       ...session,
       user: {
         ...session.user,
-        id: user.id,
+        id: token.sub,
       },
     }),
   },
   adapter: PrismaAdapter(db),
+  session: {
+    strategy: "jwt",
+  },
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
+    CredentialsProvider({
+      credentials: {
+        message: {
+          label: "Message",
+          placeholder: "0x0",
+          type: "text",
+        },
+        signature: {
+          label: "Signature",
+          placeholder: "0x0",
+          type: "text",
+        },
+      },
+      name: "Ethereum",
+      async authorize(credentials, req) {
+        try {
+          const siwe = new SiweMessage(
+            JSON.parse(
+              (credentials?.message as string) ?? "{}",
+            ) as Partial<SiweMessage>,
+          );
+
+          const nextAuthUrl = env.NEXTAUTH_URL;
+
+          if (!nextAuthUrl) {
+            return null;
+          }
+
+          const nextAuthHost = new URL(nextAuthUrl).host;
+          if (siwe.domain !== nextAuthHost) {
+            return null;
+          }
+
+          if (
+            siwe.nonce !==
+            (await getCsrfToken({ req: { headers: req.headers } }))
+          ) {
+            return null;
+          }
+
+          // 检查用户是否存在数据库中
+          const user = await db.user.findUnique({
+            where: {
+              address: siwe.address,
+            },
+          });
+
+          // 不存在用户则创建，默认身份是用户
+          if (!user) {
+            const user = await db.user.create({
+              data: {
+                address: siwe.address,
+                role: "user",
+              },
+            });
+
+            await db.account.create({
+              data: {
+                userId: user.id,
+                type: "credentials",
+                provider: "Ethereum",
+                providerAccountId: siwe.address,
+              },
+            });
+          }
+
+          await siwe.verify({ signature: credentials?.signature ?? "" });
+
+          return {
+            id: siwe.address,
+          };
+        } catch (e) {
+          return null;
+        } finally {
+        }
+      },
     }),
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
   ],
 };
 

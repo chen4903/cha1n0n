@@ -3,6 +3,7 @@ import "~/styles/globals.css";
 import { headers } from "next/headers";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Poppins, Kanit } from "next/font/google";
+import { Provider } from "./_components/provider";
 import { AnimateEnter } from "./_components/animate-enter";
 
 import type { Metadata } from "next";
@@ -44,9 +45,11 @@ export default function RootLayout({
         className={`font-sans ${poppins.variable} ${kanit.variable} bg-background font-poppins relative flex min-h-screen justify-center outline-none`}
       >
         <TRPCReactProvider headers={headers()}>
-          <AnimateEnter className="max-w-9xl mx-auto flex flex-col px-8 lg:flex-row lg:gap-10 lg:py-20">
-            {children}
-          </AnimateEnter>
+          <Provider>
+            <AnimateEnter className="max-w-9xl mx-auto flex flex-col px-8 lg:flex-row lg:gap-10 lg:py-20">
+              {children}
+            </AnimateEnter>
+          </Provider>
         </TRPCReactProvider>
       </body>
     </html>

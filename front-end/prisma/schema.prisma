@@ -14,16 +14,19 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
+model Music {
+    id          String   @id @default(cuid())
+    title       String
+    description String
+    image       Boolean
+    path        String
+    author      String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    createdBy   User     @relation(fields: [createdById], references: [address])
     createdById String
 
-    @@index([name])
+    @@index([title])
 }
 
 // Necessary for Next auth
@@ -54,14 +57,14 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+    id       String    @id @default(cuid())
+    name     String?
+    address  String    @unique
+    role     String
+    money    Int       @default(0)
+    accounts Account[]
+    sessions Session[]
+    posts    Music[]
 }
 
 model VerificationToken {
