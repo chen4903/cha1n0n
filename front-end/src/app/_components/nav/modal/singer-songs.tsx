@@ -27,7 +27,7 @@ export function SingerSongs() {
   const { register, handleSubmit } = useForm<FormValues>();
 
   const onSubmit = handleSubmit((data) => {
-    console.log("提交", data.singer);
+    setSinger(data.singer);
     if (!isEOAAddress(data.singer)) {
       toast.error("🦄 Please check input", {
         position: "top-right",
@@ -41,7 +41,6 @@ export function SingerSongs() {
       });
       return;
     }
-    setSinger(data.singer);
     setIsHidden(false);
     // handleMarketLengthMusic(data.singer);
   });
