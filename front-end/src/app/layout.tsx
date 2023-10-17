@@ -1,9 +1,10 @@
 import "~/styles/globals.css";
 
-import { Inter } from "next/font/google";
 import { headers } from "next/headers";
-
+import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
+
+import { AnimateEnter } from "./_components/animate-enter";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,7 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${inter.variable}`}>
-        <TRPCReactProvider headers={headers()}>{children}</TRPCReactProvider>
+        <TRPCReactProvider headers={headers()}>
+          <AnimateEnter className="max-w-9xl mx-auto flex flex-col px-8 lg:flex-row lg:gap-10 lg:py-20">
+            {children}
+          </AnimateEnter>
+        </TRPCReactProvider>
       </body>
     </html>
   );
