@@ -1,4 +1,5 @@
-import { postRouter } from "~/server/api/routers/post";
+import { musicRouter } from "./routers/music";
+import { roleRouter } from "./routers/role";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -7,7 +8,8 @@ import { createTRPCRouter } from "~/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  post: postRouter,
+  role: roleRouter,
+  music: musicRouter,
 });
 
 // export type definition of API
