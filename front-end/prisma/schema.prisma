@@ -61,7 +61,7 @@ model User {
     name     String?
     address  String    @unique
     role     String
-    money    Int       @default(0)
+    money    Int       @default(100)
     accounts Account[]
     sessions Session[]
     posts    Music[]
