@@ -27,7 +27,7 @@ export default function SingerNav() {
       className="sapce-y-1.5"
     >
       <Link
-        href={`/music/${address}`}
+        href={`/singer/${address}`}
         onMouseEnter={() => subscribeRef.current?.play()}
         onMouseLeave={() => subscribeRef.current?.stop()}
         className={clsx(

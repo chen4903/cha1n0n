@@ -32,7 +32,7 @@ export function Singerubscribe({ address }: { address: string }) {
                   </li>
                 ))
               : null}
-            <SingerSubscribeItem title={"test"} />
+            <SingerSubscribeItem title={address} />
           </ul>
         </section>
       ) : null}

@@ -1,13 +1,10 @@
 "use client";
 
-import { Progress } from "@nextui-org/react";
-
 type ProgressBarProps = {
   progress: number;
   onChange: (value: number) => void;
   leftLabel?: string;
   rightLabel?: string;
-  name: string;
 };
 
 const ProgressBar = ({
@@ -15,28 +12,24 @@ const ProgressBar = ({
   onChange,
   leftLabel,
   rightLabel,
-  name,
 }: ProgressBarProps) => {
   return (
     <div className="flex h-full flex-col justify-end gap-6">
       <div className="flex flex-col">
-        <Progress
-          aria-label={name}
-          classNames={{
-            indicator: "bg-default-800 dark:bg-white",
-            track: "bg-default-500/30",
-          }}
-          color="default"
-          size="sm"
+        <input
+          type="range"
+          min={0}
+          max="100"
           value={progress}
-          minValue={0}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          step="0.25"
+          onChange={(event) => {
             onChange(parseInt(event?.target.value));
           }}
+          className="range range-xs w-full"
         />
         <div className="mt-2 flex w-full flex-row justify-between  text-primary/30">
-          <span className="text-xs">1{leftLabel}</span>
-          <span className="text-xs">2{rightLabel}</span>
+          <span className="text-xs">{leftLabel}</span>
+          <span className="text-xs">{rightLabel}</span>
         </div>
       </div>
     </div>

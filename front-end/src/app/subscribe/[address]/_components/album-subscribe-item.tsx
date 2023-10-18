@@ -1,20 +1,30 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { formatDate } from "~/utils";
+import Image from "next/image";
 
+import { ImagesArray } from "~/utils/images";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { useTransferUserRightPending } from "~/hooks/write/transferUserRightPending";
 
-import { Icons } from "./icons";
-
-import { useRouter } from "next/navigation";
-import hero from "public/images/hero-card.png";
-
-export default function AlbumSubscribeItem({ title }: { title: string }) {
+export default function AlbumSubscribeItem({
+  title,
+  address,
+  index,
+}: {
+  title: string;
+  address: string;
+  index: number;
+}) {
   const mouseX = useMotionValue(0);
+
   const mouseY = useMotionValue(0);
-  const router = useRouter();
+
+  const ImageIndex = index % 6;
+
+  // const {} =useTransferUserRightPending({
+
+  // })
   return (
     <div
       onMouseMove={(e) => {
@@ -39,17 +49,17 @@ export default function AlbumSubscribeItem({ title }: { title: string }) {
         }}
       />
       <div className="relative flex flex-col">
-        <figure className="relative rounded-xl px-2 pb-4 pt-6">
-          <button className="absolute"></button>
-          <Image
-            src={hero}
-            className="h-full max-h-[280px] w-full max-w-[1024px] rounded-xl object-cover"
-            alt={title}
-            placeholder="blur"
-            blurDataURL={hero.blurDataURL}
-          />
-        </figure>
-
+        <Link href={`/music/${address}?index=${ImageIndex}`}>
+          <figure className="relative rounded-xl px-2 pb-4 pt-6">
+            <Image
+              src={ImagesArray[ImageIndex]!}
+              className="h-full max-h-[280px] w-full max-w-[1024px] rounded-xl object-cover"
+              alt={title}
+              placeholder="blur"
+              blurDataURL={ImagesArray[ImageIndex]!.blurDataURL}
+            />
+          </figure>
+        </Link>
         <div className="flex w-full flex-col space-y-4 px-3 py-1">
           <div className="flex flex-col justify-center space-y-2">
             <div className="flex items-center justify-between">

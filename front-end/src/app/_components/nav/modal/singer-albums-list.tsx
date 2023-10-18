@@ -22,6 +22,8 @@ export function SingerAlbumsList() {
 
   const [singer, setSinger] = React.useState("");
 
+  const [singerData, setSingerData] = React.useState<string[]>([]);
+
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const { register, handleSubmit } = useForm<FormValues>();
@@ -52,6 +54,7 @@ export function SingerAlbumsList() {
   };
 
   const handleUseMarketLengthMusic = () => {
+    setSingerData(getSingerAlbumsList);
     toast(`🦄 ${getSingerAlbumsList}`, {
       position: "top-right",
       autoClose: 5000,
@@ -107,8 +110,8 @@ export function SingerAlbumsList() {
                     min={42}
                     {...register("singer")}
                   />
-                  <ModalFooter className="items-center justify-between pl-0 pt-6">
-                    <div className="flex items-center gap-4">
+                  <ModalFooter className="items-center justify-between pl-0 pt-6 flex flex-col">
+                    <div className="flex  gap-4 justify-start">
                       <Button
                         color="danger"
                         size="sm"
@@ -150,6 +153,13 @@ export function SingerAlbumsList() {
                       >
                         Start
                       </Button>
+                    </div>
+                    <div className="py-6 flex flex-wrap justify-start">
+                      {singerData.map((item, index) => (
+                        <span className="px-4 py-2 card" key={index}>
+                          {item}
+                        </span>
+                      ))}
                     </div>
                   </ModalFooter>
                 </form>

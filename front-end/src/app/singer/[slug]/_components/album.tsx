@@ -1,24 +1,14 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import Image from "next/image";
-import albumImageOne from "public/images/album-1.jpg";
-import albumImageTwo from "public/images/album-2.jpg";
-import albumImageThree from "public/images/album-3.jpg";
-import albumImageFour from "public/images/album-4.jpg";
-import albumImageFive from "public/images/album-5.jpg";
-import { Card, CardHeader, Link } from "@nextui-org/react";
+
+import { ImagesArray } from "~/utils/images";
+import { Card, CardHeader } from "@nextui-org/react";
 import { CardBody, CardFooter, Divider } from "@nextui-org/react";
 
 export function AlbumCard({ name, index }: { name: string; index: number }) {
-  const ImagesArray = [
-    albumImageOne,
-    albumImageTwo,
-    albumImageThree,
-    albumImageFour,
-    albumImageFive,
-  ];
-
   const ImageIndex = index % 6;
 
   return (
@@ -42,12 +32,8 @@ export function AlbumCard({ name, index }: { name: string; index: number }) {
         />
       </CardBody>
       <CardFooter className="flex items-center justify-center">
-        <Link
-          isExternal
-          showAnchorIcon
-          href={`/music/${name}?index=${ImageIndex}`}
-        >
-          Visit now
+        <Link href={`/music/${name}?index=${ImageIndex}`}>
+          <button className="btn btn-ghost btn-md">Visit now</button>
         </Link>
       </CardFooter>
     </Card>

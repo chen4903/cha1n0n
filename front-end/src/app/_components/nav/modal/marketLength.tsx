@@ -35,6 +35,9 @@ export function MarketLenth() {
 
   const [name, setName] = React.useState("");
 
+  const [marketLengthMusicAlbumData, setMarketLengthMusicAlbumData] =
+    React.useState([]);
+
   const [selected, setSelected] = React.useState("music");
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -187,6 +190,7 @@ export function MarketLenth() {
       progress: undefined,
       theme: "dark",
     });
+    setMarketLengthMusicAlbumData(marketLengthMusicAlbumData);
   };
 
   return (
@@ -358,6 +362,16 @@ export function MarketLenth() {
                   </Tab>
                 </Tabs>
               </ModalBody>
+
+              {marketLengthMusicAlbumData.length > 0 ? (
+                <ModalFooter>
+                  {marketLengthMusicAlbumData.map((item, index) => (
+                    <span className="px-6 py-3 text-xs" key={index}>
+                      {item}
+                    </span>
+                  ))}
+                </ModalFooter>
+              ) : null}
             </>
           )}
         </ModalContent>

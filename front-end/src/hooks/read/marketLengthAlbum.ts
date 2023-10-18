@@ -13,7 +13,7 @@ type MarketLengthMusicAlbumValue = {
 
 type MarketLengthMusicAlbumProps = {
   address: `0x${string}` | undefined;
-  marketLengthMusicAlbum: string;
+  marketLengthMusicAlbum: string[];
   getUserDescribeSingersLoading: boolean;
   getUserDescribeSingersError: boolean;
 };
@@ -26,7 +26,7 @@ export const useMarketLengthMusicAlbum = ({
 
   const [state, setState] = React.useState<MarketLengthMusicAlbumProps>({
     address: undefined,
-    marketLengthMusicAlbum: "",
+    marketLengthMusicAlbum: [],
     getUserDescribeSingersLoading: true,
     getUserDescribeSingersError: false,
   });
@@ -42,7 +42,7 @@ export const useMarketLengthMusicAlbum = ({
     functionName: "marketLength",
     args: [singer, name],
     watch: true,
-  }) as { data: string; isLoading: boolean; isError: boolean };
+  }) as { data: string[]; isLoading: boolean; isError: boolean };
 
   React.useEffect(() => {
     setState({

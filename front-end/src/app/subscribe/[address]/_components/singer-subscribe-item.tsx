@@ -1,21 +1,19 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { formatDate } from "~/utils";
-
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
-
-import { Icons } from "./icons";
-
+import { shortenAddress } from "~/utils";
 import { Avatar } from "@nextui-org/react";
+import { Tooltip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
-import hero from "public/images/hero-card.png";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 
 export default function SingerSubscribeItem({ title }: { title: string }) {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
+  const router = useRouter();
+
+  const address = shortenAddress(title);
   return (
     <div className="group relative flex flex-col items-center rounded-xl border-zinc-800 p-2">
       <motion.div
@@ -30,12 +28,16 @@ export default function SingerSubscribeItem({ title }: { title: string }) {
           `,
         }}
       />
-      <Avatar
-        isBordered
-        radius="sm"
-        size="lg"
-        src="https://i.pravatar.cc/150?u=a04258a2462d826712d"
-      />
+
+      <Tooltip content={address} placement="bottom">
+        <Avatar
+          isBordered
+          radius="sm"
+          size="lg"
+          src="https://i.pravatar.cc/150?u=a04258a2462d826712d"
+          onClick={() => router.push(`/singer/${title}`)}
+        />
+      </Tooltip>
     </div>
   );
 }

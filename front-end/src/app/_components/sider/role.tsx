@@ -22,7 +22,7 @@ enum RoleType {
   Owner = "owner",
 }
 
-export default async function Role() {
+export default function Role() {
   const { address } = useAccount();
 
   const [role, setRole] = useAtom(roleAtom);

@@ -2,14 +2,11 @@
 
 import React from "react";
 import Lottie from "lottie-react";
-import { useRouter } from "next/navigation";
 import { Title } from "~/app/_components/title";
 
 import arrowIcon from "public/icons/static/arrow.json";
 
 export function User() {
-  const router = useRouter();
-
   const arrowRef = React.useRef<any>();
   return (
     <section className="">
@@ -18,7 +15,7 @@ export function User() {
           Latest subscription
         </Title>
         <button
-          className="text-foreground btn btn-ghost hover:text-primary flex items-center gap-1 text-xs font-medium duration-300"
+          className="btn btn-ghost flex items-center gap-1 text-xs font-medium text-foreground duration-300 hover:text-primary"
           onMouseEnter={() => arrowRef.current?.play()}
           onMouseLeave={() => arrowRef.current?.stop()}
         >
