@@ -67,4 +67,20 @@ export const roleRouter = createTRPCRouter({
         },
       });
     }),
+  setOwner: protectedProcedure
+    .input(
+      z.object({
+        address: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.db.user.updateMany({
+        data: {
+          role: "owner",
+        },
+        where: {
+          address: input.address,
+        },
+      });
+    }),
 });
