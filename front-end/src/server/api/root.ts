@@ -1,6 +1,7 @@
 import { musicRouter } from "./routers/music";
 import { roleRouter } from "./routers/role";
 import { createTRPCRouter } from "~/server/api/trpc";
+import { moneyRouter } from "./routers/money";
 
 /**
  * This is the primary router for your server.
@@ -10,6 +11,7 @@ import { createTRPCRouter } from "~/server/api/trpc";
 export const appRouter = createTRPCRouter({
   role: roleRouter,
   music: musicRouter,
+  money: moneyRouter,
 });
 
 // export type definition of API
