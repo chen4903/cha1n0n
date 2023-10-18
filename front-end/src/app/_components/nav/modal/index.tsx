@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { MarketLenth } from "./marketLength";
 import { SingerSongs } from "./singer-songs";
 import { SingerAlbums } from "./singer-albums";
+import { SingerAlbumsList } from "./singer-albums-list";
 
 export function Modal() {
   const pathname = usePathname();
@@ -19,6 +20,7 @@ export function Modal() {
       <MarketLenth />
       <SingerSongs />
       <SingerAlbums />
+      <SingerAlbumsList />
     </div>
   );
 }
