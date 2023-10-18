@@ -19,6 +19,7 @@ enum RoleType {
   User = "user",
   Singer = "singer",
   Platform = "platform",
+  Owner = "owner",
 }
 
 export default async function Role() {
@@ -42,6 +43,23 @@ export default async function Role() {
       onSuccess: () => {
         setRole("singer");
         toast(`🦄 The role updated to singer`, {
+          position: "top-right",
+          autoClose: 1000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+      },
+    });
+
+  const { mutate: updateOwnerMutate, isLoading: updateOwnerIsLoading } =
+    api.role.setSinger.useMutation({
+      onSuccess: () => {
+        setRole("owner");
+        toast(`🦄 The role updated to owner`, {
           position: "top-right",
           autoClose: 1000,
           hideProgressBar: true,
@@ -94,15 +112,22 @@ export default async function Role() {
     [RoleType.User]: updateUserMutate,
     [RoleType.Singer]: updateSingerMutate,
     [RoleType.Platform]: updatePlatformMutate,
+    [RoleType.Owner]: updateOwnerMutate,
   };
 
   const roleLoadingMap = {
     user: updateUserIsLoading,
     singer: updateSingerIsLoading,
     platform: updatePlatformIsLoading,
+    owner: updateOwnerIsLoading,
   };
 
-  const roleNames = [RoleType.User, RoleType.Singer, RoleType.Platform];
+  const roleNames = [
+    RoleType.User,
+    RoleType.Singer,
+    RoleType.Platform,
+    RoleType.Owner,
+  ];
 
   const nextRoleIndex = roleNames.indexOf(role as RoleType);
 
