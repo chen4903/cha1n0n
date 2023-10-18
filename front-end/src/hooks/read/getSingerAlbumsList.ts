@@ -11,7 +11,7 @@ type GetSingerAlbumsListValue = {
 
 type GetSingerAlbumsListProps = {
   address: `0x${string}` | undefined;
-  getSingerAlbumsList: string;
+  getSingerAlbumsList: string[];
   getGetSingerAlbumsListLoading: boolean;
   getGetSingerAlbumsListError: boolean;
 };
@@ -23,7 +23,7 @@ export const useGetSingerAlbumsList = ({
 
   const [state, setState] = React.useState<GetSingerAlbumsListProps>({
     address: undefined,
-    getSingerAlbumsList: "",
+    getSingerAlbumsList: [],
     getGetSingerAlbumsListLoading: true,
     getGetSingerAlbumsListError: false,
   });
@@ -39,7 +39,7 @@ export const useGetSingerAlbumsList = ({
     functionName: "getSingerAlbumsList",
     args: [input],
     watch: true,
-  }) as { data: string; isLoading: boolean; isError: boolean };
+  }) as { data: string[]; isLoading: boolean; isError: boolean };
 
   React.useEffect(() => {
     setState({
