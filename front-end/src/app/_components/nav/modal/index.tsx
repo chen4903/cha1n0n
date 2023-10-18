@@ -17,7 +17,7 @@ export function Modal() {
       <SingerSongs />
       <SingerAlbums />
       <SingerAlbumsList />
-      <Divider />
+      <Divider className="my-2"/>
       <Money />
     </div>
   );

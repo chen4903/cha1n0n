@@ -3,6 +3,7 @@
 import React from "react";
 import { env } from "~/env.mjs";
 import { ethers } from "ethers";
+import { Theme } from "@radix-ui/themes";
 import { hardhat, goerli } from "wagmi/chains";
 import { SessionProvider } from "next-auth/react";
 import { NextUIProvider } from "@nextui-org/react";
@@ -14,6 +15,7 @@ import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { RainbowKitSiweNextAuthProvider } from "@rainbow-me/rainbowkit-siwe-next-auth";
 
 import abi from "~/config/abi.json";
+import "@radix-ui/themes/styles.css";
 import "@rainbow-me/rainbowkit/styles.css";
 
 import type { GetSiweMessageOptions } from "@rainbow-me/rainbowkit-siwe-next-auth";
@@ -93,7 +95,9 @@ export function Provider({ children }: { children: React.ReactNode }) {
             theme={darkTheme()}
           >
             <AppContext.Provider value={value}>
-              <NextUIProvider>{children}</NextUIProvider>
+              <NextUIProvider>
+                <Theme>{children}</Theme>
+              </NextUIProvider>
             </AppContext.Provider>
           </RainbowKitProvider>
         </RainbowKitSiweNextAuthProvider>
