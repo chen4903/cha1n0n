@@ -52,7 +52,7 @@ export function SingerSongs() {
   };
 
   const handleUseMarketLengthMusic = () => {
-    toast(`"🦄 ${singerSongs}"`, {
+    toast(`🦄 ${singerSongs}`, {
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: false,
