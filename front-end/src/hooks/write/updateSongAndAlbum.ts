@@ -5,6 +5,7 @@ import { useAccount, useContractWrite } from "wagmi";
 import { stringToBytes4 } from "~/utils";
 import { usePrepareContractWrite, useWaitForTransaction } from "wagmi";
 import { toast } from "react-toastify";
+import { ethers } from "ethers";
 
 //   歌手：设置订阅价格
 interface UpdateSongProps {
@@ -37,7 +38,7 @@ export const useUpdateSong = ({ price, onSetSongSuccess }: UpdateSongProps) => {
       chainId: parseInt(env.NEXT_PUBLIC_CHAIN_ID ?? "5"),
       abi,
       functionName: "updateSongAndAlbum",
-      args: [price, "0x0000000"],
+      args: [address, price, "0x00000000"],
     },
   );
 

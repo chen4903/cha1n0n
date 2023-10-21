@@ -14,6 +14,7 @@ export default function Home() {
   React.useEffect(() => {
     setInit(true);
   }, []);
+  
   return (
     <>
       {init ? (

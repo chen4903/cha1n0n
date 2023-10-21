@@ -38,7 +38,6 @@ export const useGetUserDescribeSingerList = ({
     abi,
     functionName: "getUserDescribeSingerList",
     args: [input],
-    watch: true,
   }) as { data: string[]; isLoading: boolean; isError: boolean };
 
   React.useEffect(() => {

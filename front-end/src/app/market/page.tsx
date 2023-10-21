@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useAccount } from "wagmi";
+import { api } from "~/trpc/react";
 import { Icons } from "./_component/icons";
 import { MusicTab } from "./_component/music-tab";
 import { AlbumTab } from "./_component/album-tab";
@@ -10,11 +11,22 @@ import { AnimateEnter } from "~/app/_components/animate-enter";
 import { Tabs, Tab, Card, CardBody, CardHeader } from "@nextui-org/react";
 
 export default function Market() {
-  const [init, setInit] = React.useState(false);
-
-  const { address } = useAccount();
+  const account = useAccount();
 
   const [selected, setSelected] = React.useState("photos");
+
+  const [init, setInit] = React.useState(false);
+
+  const connectAddress = account.address ? account.address.toString() : "null";
+
+  const { data: role } = api.role.get.useQuery(
+    {
+      address: connectAddress,
+    },
+    {
+      enabled: connectAddress !== "null",
+    },
+  );
 
   const handleSelectionChange = (key: React.Key) => {
     if (typeof key === "string") {
@@ -29,7 +41,7 @@ export default function Market() {
   return (
     <>
       {init ? (
-        <AnimateEnter className="max-w-3xl py-8 lg:w-7/12">
+        <AnimateEnter className="max-w-4xl py-8 lg:w-7/12">
           <Tabs
             aria-label="Options"
             selectedKey={selected}
@@ -65,17 +77,19 @@ export default function Market() {
               <AlbumTab />
             </Tab>
 
-            <Tab
-              key="music"
-              title={
-                <div className="flex items-center space-x-2">
-                  <Icons.music className="h-6 w-6" />
-                  <span className="capitalize">music</span>
-                </div>
-              }
-            >
-              <MusicTab />
-            </Tab>
+            {role === "owner" ? (
+              <Tab
+                key="owner"
+                title={
+                  <div className="flex items-center space-x-2">
+                    <Icons.music className="h-6 w-6" />
+                    <span className="capitalize">investment</span>
+                  </div>
+                }
+              >
+                <MusicTab />
+              </Tab>
+            ) : null}
           </Tabs>
         </AnimateEnter>
       ) : null}

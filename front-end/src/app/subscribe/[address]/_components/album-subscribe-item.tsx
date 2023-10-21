@@ -20,11 +20,13 @@ export default function AlbumSubscribeItem({
 
   const mouseY = useMotionValue(0);
 
-  const ImageIndex = index % 6;
+  const ImageIndex = index % 5;
 
-  // const {} =useTransferUserRightPending({
+  const { transferUserRightPending } = useTransferUserRightPending({
+    singer: address,
+    name: title,
+  });
 
-  // })
   return (
     <div
       onMouseMove={(e) => {
@@ -66,6 +68,12 @@ export default function AlbumSubscribeItem({
               <h3 className="text-md font-title font-bold text-primary/30">
                 {title}
               </h3>
+              <button
+                className="badge badge-neutral hidden capitalize group-hover:flex"
+                onClick={transferUserRightPending}
+              >
+                transfer
+              </button>
               {/* <div className="badge badge-secondary text-sm">9USDT</div> */}
             </div>
             {/* <span className="w-full max-w-[420px] text-sm leading-[1.8]">

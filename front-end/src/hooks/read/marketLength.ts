@@ -42,7 +42,6 @@ export const useMarketLengthMusic = ({
     abi,
     functionName: "marketLength",
     args: [singer, "0x00000000"],
-    watch: true,
   }) as { data: string; isLoading: boolean; isError: boolean };
 
   React.useEffect(() => {

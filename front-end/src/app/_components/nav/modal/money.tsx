@@ -31,7 +31,6 @@ export function Money() {
 
   React.useEffect(() => {
     setNumber(userMoney.data ? userMoney.data : 100);
-    console.log(number, "bumber");
   }, [userMoney]);
 
   const { mutate: updateMoneyMutate, isLoading: updateMoneyIsLoading } =
@@ -67,7 +66,7 @@ export function Money() {
           <div className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-foreground duration-300 hover:bg-neutral-800  hover:text-primary">
             <Clock />
             <button className="text-sm capitalize">
-              System balance &nbsp;
+              System balance &nbsp;<span>{userMoney.data}</span>
             </button>
           </div>
         </DropdownTrigger>

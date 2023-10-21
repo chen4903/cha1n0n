@@ -21,7 +21,6 @@ const ProgressBar = ({
           min={0}
           max="100"
           value={progress}
-          step="0.25"
           onChange={(event) => {
             onChange(parseInt(event?.target.value));
           }}

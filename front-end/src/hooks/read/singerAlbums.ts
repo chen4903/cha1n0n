@@ -40,7 +40,6 @@ export const useSingerAlbums = ({
     abi,
     functionName: "singerAlbums",
     args: [input, name],
-    watch: true,
   }) as { data: string; isLoading: boolean; isError: boolean };
 
   React.useEffect(() => {

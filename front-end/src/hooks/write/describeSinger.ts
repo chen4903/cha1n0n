@@ -1,16 +1,19 @@
 import React from "react";
-import { env } from "~/env.mjs";
 import abi from "~/config/abi.json";
-import { stringToBytes4 } from "~/utils";
+import { env } from "~/env.mjs";
 import { useAccount, useContractWrite } from "wagmi";
 import { usePrepareContractWrite, useWaitForTransaction } from "wagmi";
+import { toast } from "react-toastify";
+import { ethers } from "ethers";
 
-//   订阅歌手
 interface DescribeSingerProps {
-  singer: string;
   time: string;
+  singer: string;
+  price: string;
   onSetSongSuccess?: () => void;
 }
+
+// 订阅歌手
 
 interface SongState {
   address: `0x${string}` | undefined;
@@ -18,11 +21,13 @@ interface SongState {
   describeSingerLoading: boolean;
   preparedescribeSingerbeError: boolean;
   describeSingerError: boolean;
+  describeError: Error | null;
 }
 
 export const useDescribeSinger = ({
   singer,
   time,
+  price = "0",
   onSetSongSuccess,
 }: DescribeSingerProps) => {
   const { address } = useAccount();
@@ -33,16 +38,21 @@ export const useDescribeSinger = ({
     describeSingerLoading: false,
     preparedescribeSingerbeError: false,
     describeSingerError: false,
+    describeError: null,
   });
 
-  const { config, isError: preparedescribeSingerbeError } =
-    usePrepareContractWrite({
-      address: env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-      chainId: parseInt(env.NEXT_PUBLIC_CHAIN_ID ?? "5"),
-      abi,
-      functionName: "describe",
-      args: ["0.1", singer, "0x00000000", time, address],
-    });
+  const {
+    config,
+    isError: preparedescribeSingerbeError,
+    error: describeError,
+  } = usePrepareContractWrite({
+    address: env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+    chainId: parseInt(env.NEXT_PUBLIC_CHAIN_ID ?? "5"),
+    abi,
+    functionName: "describe",
+    args: [singer, "0x00000000", time, address],
+    value: BigInt(price),
+  });
 
   const {
     data,
@@ -54,9 +64,17 @@ export const useDescribeSinger = ({
   const { isLoading: txLoading } = useWaitForTransaction({
     hash: data?.hash,
     onSuccess: () => {
-      if (onSetSongSuccess) {
-        onSetSongSuccess();
-      }
+      onSetSongSuccess;
+      toast.success("🦄 success!!!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     },
   });
 
@@ -67,6 +85,7 @@ export const useDescribeSinger = ({
       describeSingerLoading: describeSingerLoading || txLoading,
       preparedescribeSingerbeError,
       describeSingerError,
+      describeError,
     });
   }, [
     address,
@@ -75,6 +94,8 @@ export const useDescribeSinger = ({
     preparedescribeSingerbeError,
     describeSingerError,
     txLoading,
+
+    describeError,
   ]);
 
   return state;

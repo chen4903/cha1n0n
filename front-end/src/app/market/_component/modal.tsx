@@ -2,61 +2,107 @@
 
 import clsx from "clsx";
 import React from "react";
-import Lottie from "lottie-react";
-import { RadioGroup, Radio } from "@nextui-org/react";
-import arrowIcon from "public/icons/static/arrow.json";
-import { Button, DropdownItem } from "@nextui-org/react";
-import { Modal, ModalContent, ModalHeader } from "@nextui-org/react";
-import { Tabs, Tab, Card, CardBody, CardHeader } from "@nextui-org/react";
-import { useDisclosure, ModalBody, ModalFooter } from "@nextui-org/react";
 
+import { useDescribeSinger } from "~/hooks/write/describeSinger";
+import { useReadyForDescribe } from "~/hooks/write/readyForDescribe";
+import { DropdownMenu } from "@radix-ui/themes";
 import { useAccount } from "wagmi";
-import { toast } from "react-toastify";
-import { cn, isEOAAddress, isBytes4 } from "~/utils";
-import { useForm, Resolver } from "react-hook-form";
+import { useAtom } from "jotai";
+import { readyForDescribeAtom } from "~/utils/atom";
 import { useHooks } from "~/app/_components/provider";
-import { useMarketLengthMusic } from "~/hooks/read/marketLength";
-import { useMarketLengthMusicAlbum } from "~/hooks/read/marketLengthAlbum";
-import { Dropdown, DropdownTrigger, DropdownMenu } from "@nextui-org/react";
 
-export function ModalButton({ text }: { text: string }) {
+export function ModalButton({
+  text,
+  singer,
+  price,
+}: {
+  text: string;
+  singer: string;
+  price: string;
+}) {
   const { address } = useAccount();
+  const [readyForDescribeState] = useAtom(readyForDescribeAtom);
+  const { readyForDescribe } = useReadyForDescribe({ author: address });
 
-  const items = [
-    {
-      key: "system",
-      label: "system",
-    },
-    {
-      key: "self",
-      label: "self",
-    },
-  ];
+  const thirty = useDescribeSinger({
+    singer: singer,
+    time: "0",
+    price: price,
+  });
+
+  const sixty = useDescribeSinger({
+    singer: singer,
+    time: "1",
+    price: price,
+  });
+
+  const { signer } = useHooks();
+
+  const handleThirty = async () => {
+
+    const tx = await signer.describe(singer, "0x00000000", "0", address, {
+      value: BigInt(price),
+      gasLimit: 500000,
+    });
+
+    await tx.wait();
+  };
+
+  const handleSixty = async () => {
+    const tx = await signer.describe(singer, "0x00000000", "1", address, {
+      value: BigInt(price),
+      gasLimit: 500000,
+    });
+    await tx.wait();
+  };
 
   return (
-    <>
-      <Dropdown>
-        <DropdownTrigger>
-          <button className="h-full w-full border-none bg-transparent outline-none">
-            {text}
-          </button>
-        </DropdownTrigger>
-        <DropdownMenu
-          aria-label="subscribe"
-          items={items}
-          className="space-y-2"
-        >
-          {items.map((item) => (
-            <DropdownItem
-              key={item.key}
-              color={item.key === "delete" ? "danger" : "default"}
-              className={item.key === "delete" ? "text-danger" : ""}
-            >
-              {item.label}
-            </DropdownItem>
-          ))}
-        </DropdownMenu>
-      </Dropdown>
-    </>
+    <div>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          <button className="btn btn-xs rounded-xl">{text}</button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content>
+          <DropdownMenu.Sub>
+            <DropdownMenu.SubTrigger className="px-3 capitalize">
+              self
+            </DropdownMenu.SubTrigger>
+            <DropdownMenu.SubContent className="m-2">
+              <DropdownMenu.Item
+                onClick={
+                  readyForDescribeState
+                    ? thirty.describeSinger
+                    : readyForDescribe
+                }
+              >
+                30 days
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                onClick={
+                  readyForDescribeState
+                    ? sixty.describeSinger
+                    : readyForDescribe
+                }
+              >
+                60 days
+              </DropdownMenu.Item>
+            </DropdownMenu.SubContent>
+          </DropdownMenu.Sub>
+          <DropdownMenu.Sub>
+            <DropdownMenu.SubTrigger className="px-3 capitalize">
+              system
+            </DropdownMenu.SubTrigger>
+            <DropdownMenu.SubContent className="m-2">
+              <DropdownMenu.Item onClick={handleThirty}>
+                30 days
+              </DropdownMenu.Item>
+              <DropdownMenu.Item onClick={handleSixty}>
+                60 days
+              </DropdownMenu.Item>
+            </DropdownMenu.SubContent>
+          </DropdownMenu.Sub>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    </div>
   );
 }
